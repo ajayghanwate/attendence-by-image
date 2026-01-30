@@ -15,6 +15,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def health_check():
+    """Health check endpoint for Render"""
+    return {
+        "status": "healthy",
+        "service": "AI Attendance System API",
+        "version": "1.0.0"
+    }
+
 @app.post("/teacher/signup")
 async def signup_teacher(email: str = Form(...), password: str = Form(...)):
     try:
