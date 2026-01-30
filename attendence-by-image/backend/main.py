@@ -17,6 +17,12 @@ app.add_middleware(
 
 @app.post("/teacher/signup")
 async def signup_teacher(email: str = Form(...), password: str = Form(...)):
+    if not supabase:
+        # Mock Response
+        return {
+            "message": "Teacher registered successfully (Mock)",
+            "user": {"id": "mock-user-id", "email": email}
+        }
     try:
         res = supabase.auth.sign_up({
             "email": email,
@@ -38,6 +44,13 @@ async def signup_teacher(email: str = Form(...), password: str = Form(...)):
 
 @app.post("/teacher/login")
 async def login_teacher(email: str = Form(...), password: str = Form(...)):
+    if not supabase:
+        # Mock Response
+        return {
+            "message": "Login successful (Mock)",
+            "user": {"id": "mock-user-id", "email": email},
+            "session": {"access_token": "mock-token", "refresh_token": "mock-refresh"}
+        }
     try:
         res = supabase.auth.sign_in_with_password({
             "email": email,
@@ -55,6 +68,9 @@ async def register_student(
     roll_number: str = Form(...),
     image: UploadFile = File(...)
 ):
+    if not supabase:
+        return {"message": "Student registered successfully (Mock)", "student_id": str(uuid.uuid4())}
+
     try:
         # Read image bytes
         image_bytes = await image.read()
@@ -95,6 +111,13 @@ async def take_attendance(
     teacher_id: str = Form(...), # Associated with the logged-in teacher
     image: UploadFile = File(...)
 ):
+    if not supabase:
+        return {
+            "message": "Attendance marked (Mock)",
+            "session_id": str(uuid.uuid4()),
+            "present_count": 5
+        }
+
     try:
         image_bytes = await image.read()
         
@@ -150,11 +173,33 @@ async def take_attendance(
 
 @app.get("/students")
 async def get_students():
+    if not supabase:
+        return [
+            {"id": "1", "name": "Alice Smith", "roll_number": "A001"},
+            {"id": "2", "name": "Bob Jones", "roll_number": "A002"},
+            {"id": "3", "name": "Charlie Brown", "roll_number": "A003"},
+        ]
     res = supabase.table("students").select("*").execute()
     return res.data
 
 @app.get("/attendance-history")
 async def get_history(teacher_id: str):
+    if not supabase:
+        from datetime import datetime
+        return [
+            {
+                "id": "session-1",
+                "subject": "Mathematics",
+                "created_at": datetime.now().isoformat(),
+                "attendance_records": [{"count": 25}]
+            },
+            {
+                "id": "session-2",
+                "subject": "Physics",
+                "created_at": datetime.now().isoformat(),
+                "attendance_records": [{"count": 18}]
+            }
+        ]
     # Only show history for the specific teacher
     res = supabase.table("attendance_sessions")\
         .select("*, attendance_records(count)")\
@@ -165,7 +210,12 @@ async def get_history(teacher_id: str):
 
 @app.get("/attendance-history/{session_id}")
 async def get_session_details(session_id: str):
-    res = supabase.table("attendance_records").select("*, students(*)").eq("session_id", session_id).execute()
+    if not supabase:
+        return [
+            {"student_id": "1", "status": "present", "created_at": "2023-10-27T10:00:00Z", "students": {"name": "Alice Smith", "roll_number": "A001"}},
+            {"student_id": "2", "status": "present", "created_at": "2023-10-27T10:05:00Z", "students": {"name": "Bob Jones", "roll_number": "A002"}},
+        ]
+    res = supabase.table("attendance_records").select("*, students(*), attendance_sessions(subject, created_at)").eq("session_id", session_id).execute()
     return res.data
 
 if __name__ == "__main__":
