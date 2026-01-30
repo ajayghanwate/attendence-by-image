@@ -1,0 +1,30 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Environment Variables
+.env
+
+# Python Cache
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Project Specific
+backend/.env
+backend/venv/
+backend/__pycache__/
+
+# DeepFace / TensorFlow Weights (if downloaded locally)
+.deepface/
+weights/

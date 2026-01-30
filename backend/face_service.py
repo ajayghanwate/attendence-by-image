@@ -17,20 +17,26 @@ class FaceService:
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        # DeepFace represent extracts embeddings
-        # enforce_detection=True will raise error if no face is found
-        results = DeepFace.represent(
-            img_path=img, 
-            model_name=self.model_name, 
-            enforce_detection=True,
-            detector_backend="opencv"
-        )
-        
-        if not results:
-            return None
+        try:
+            # DeepFace represent extracts embeddings
+            # Setting enforce_detection=False prevents crashing if no face is found
+            # retinaface is more robust but may be slower. stick to opencv for now but disable enforcement.
+            results = DeepFace.represent(
+                img_path=img, 
+                model_name=self.model_name, 
+                enforce_detection=False,
+                detector_backend="opencv"
+            )
             
-        # Return the first face's embedding
-        return results[0]["embedding"]
+            if not results or len(results) == 0:
+                print("No face detected in registration image.")
+                return None
+                
+            # Return the first face's embedding
+            return results[0]["embedding"]
+        except Exception as e:
+            print(f"Error extracting embedding: {e}")
+            return None
 
     def process_attendance_image(self, image_bytes):
         """

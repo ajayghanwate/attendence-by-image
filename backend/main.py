@@ -1,8 +1,10 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from supabase_client import supabase
 from face_service import face_service
 import uuid
+import os
 from typing import List
 
 app = FastAPI(title="AI Attendance System API")
@@ -167,6 +169,11 @@ async def get_history(teacher_id: str):
 async def get_session_details(session_id: str):
     res = supabase.table("attendance_records").select("*, students(*)").eq("session_id", session_id).execute()
     return res.data
+
+# Serve Frontend Files (After all API routes)
+frontend_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
