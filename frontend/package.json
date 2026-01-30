@@ -1,0 +1,12 @@
+{
+  "name": "ai-attendance-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for AI Attendance System",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
